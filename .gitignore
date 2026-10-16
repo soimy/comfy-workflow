@@ -1,0 +1,23 @@
+# ComfyUI 大文件与运行数据不入库，代码入库
+__pycache__/
+*.pyc
+.venv/
+hf_cache/
+
+# 模型 / 生成产物 / 日志
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+*.bin
+*.gguf
+*.log
+ComfyUI/user/**
+ComfyUI/output/**
+ComfyUI/input/**
+ComfyUI/temp/**
+ComfyUI/models/**
+!ComfyUI/models/.gitkeep
+
+# 自定义节点里各自的运行缓存
+ComfyUI/custom_nodes/*/__pycache__/
