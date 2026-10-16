@@ -7,7 +7,7 @@ REPO="${REPO:-$HOME/Repo/comfyui}"
 distrobox enter "$NAME" -- bash -lc "
   source '$REPO/ComfyUI/.venv/bin/activate'
   cd '$REPO/ComfyUI'
-  nohup python main.py --listen 127.0.0.1 --port 8188 --preview-method auto \
+  nohup python main.py --listen 0.0.0.0 --port 8188 --preview-method auto \
     > '$REPO/comfyui.log' 2>&1 &
-  echo \"ComfyUI 已启动: http://127.0.0.1:8188 (日志: $REPO/comfyui.log)\"
+  echo \"ComfyUI 已启动: http://127.0.0.1:8188 (局域网: http://$(hostname -I | awk '{print $1}'):8188) 日志: $REPO/comfyui.log\"
 "
