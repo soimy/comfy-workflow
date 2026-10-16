@@ -5,13 +5,13 @@ set -euo pipefail
 
 REPO="${REPO:-/var/home/sym/Repo/comfyui}"
 MODELS="$REPO/ComfyUI/models"
-export HF_HUB_ENABLE_HF_TRANSFER=1
+export HF_XET_HIGH_PERFORMANCE=1
 source "$REPO/ComfyUI/.venv/bin/activate"
 
 pick=${1:-all}
 dl() { # dl <repo_id> <file> <dest_dir>
   echo ">>> $1/$2 -> models/$3/"
-  hf download "$1" "$2" --local-dir "$MODELS/$3" --local-dir-use-symlinks False
+  hf download "$1" "$2" --local-dir "$MODELS/$3"
 }
 
 case "$pick" in

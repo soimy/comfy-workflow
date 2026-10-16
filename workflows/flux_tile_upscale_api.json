@@ -1,0 +1,15 @@
+{
+  "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "flux1-dev-fp8.safetensors", "weight_dtype": "fp8_e4m3fn"}},
+  "2": {"class_type": "DualCLIPLoader", "inputs": {"clip_name1": "clip_l.safetensors", "clip_name2": "t5xxl_fp8_e4m3fn.safetensors", "type": "flux"}},
+  "3": {"class_type": "VAELoader", "inputs": {"vae_name": "ae.safetensors"}},
+  "4": {"class_type": "LoadImage", "inputs": {"image": "example.png"}},
+  "5": {"class_type": "ImageScaleBy", "inputs": {"image": ["4", 0], "upscale_method": "lanczos", "scale_by": 2.0}},
+  "6": {"class_type": "CLIPTextEncode", "inputs": {"text": "sharp focus, highly detailed, high quality photo", "clip": ["2", 0]}},
+  "7": {"class_type": "FluxGuidance", "inputs": {"conditioning": ["6", 0], "guidance": 2.5}},
+  "8": {"class_type": "CLIPTextEncode", "inputs": {"text": "", "clip": ["2", 0]}},
+  "9": {"class_type": "TiledDiffusion", "inputs": {"model": ["1", 0], "method": "MultiDiffusion", "tile_width": 1024, "tile_height": 1024, "tile_overlap": 64, "tile_batch_size": 1}},
+  "10": {"class_type": "VAEEncode", "inputs": {"pixels": ["5", 0], "vae": ["3", 0]}},
+  "11": {"class_type": "KSampler", "inputs": {"model": ["9", 0], "seed": 42, "steps": 20, "cfg": 1.0, "sampler_name": "euler", "scheduler": "simple", "positive": ["7", 0], "negative": ["8", 0], "latent_image": ["10", 0], "denoise": 0.35}},
+  "12": {"class_type": "VAEDecode", "inputs": {"samples": ["11", 0], "vae": ["3", 0]}},
+  "13": {"class_type": "SaveImage", "inputs": {"images": ["12", 0], "filename_prefix": "FluxTile_upscale"}}
+}
