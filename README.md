@@ -68,6 +68,21 @@ SeedVR2 是 **1:1 修复**模型（VAE 空间下采样 8 倍，进出一致）�
   若分片之间有轻微色调差，改成 `lab`（更忠实，但逐片各做一次色彩迁移，显存和耗时略增）。
 - 想换 7B 模型：`UNETLoader` 改成 `seedvr2_7b_int8_convrot.safetensors`（7.76GB，质量更好、更吃显存）。
 
+## 面板预置工作流
+
+ComfyUI 侧边栏读的是 `ComfyUI/user/default/workflows/`，而该目录在 submodule 里被 gitignore，
+所以预置文件不入库，换机器/重装要再放一次（复制过去即出现在面板里，无需重启）：
+
+```bash
+cp workflows/seedvr2_tile_upscale_api.json "ComfyUI/user/default/workflows/App - SeedVR2 8K 分片放大.json"
+cp workflows/flux_tile_upscale_api.json    "ComfyUI/user/default/workflows/App - Flux Tile 放大.json"
+cp workflows/supir_upscale_api.json        "ComfyUI/user/default/workflows/App - SUPIR 放大.json"
+```
+
+> 这三份都是 API 格式 JSON，前端会先跑 `isApiJson()` 判定、命中后走 `loadApiJson()` 自动生成节点图，
+> 所以画布导入和 `/prompt` 用的是同一份文件。**不要在最外层加 `_comment` 之类字段**：
+> 判定规则是「所有顶层值都必须是带 `class_type` 的对象」，多一个数组字段就会退化成按节点图解析然后报错。
+
 ## 目录
 
 ```
