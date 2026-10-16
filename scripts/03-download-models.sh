@@ -30,18 +30,21 @@ case "$pick" in
     dl Comfy-Org/flux1-dev            flux1-dev-fp8.safetensors        diffusion_models
     dl comfyanonymous/flux_text_encoders clip_l.safetensors            text_encoders
     dl comfyanonymous/flux_text_encoders t5xxl_fp8_e4m3fn.safetensors   text_encoders
-    dl black-forest-labs/FLUX.1-schnell  ae.safetensors                vae
+    dl black-forest-labs/FLUX.1-schnell  ae.safetensors                vae 2>/dev/null \
+      || dl sirorable/flux-ae-vae ae.safetensors vae
     ;;
 esac
 
 case "$pick" in
   all|supir)
-    # SUPIR 检查点 + SDXL base（SUPIR 走 SDXL 采样管线）+ 通用放大模型
-    dl kijai/SUPIR                    SUPIR-v0q.ckpt                   SUPIR
-    dl stabilityai/stable-diffusion-xl-base-1.0 sd_xl_base_1.0.safetensors checkpoints
-    dl kijai/SUPIR                    SUPIR_v0_general_v1.yaml         SUPIR
-    dl Comfy-Org/Wan_2.1_ComfyUI_repackaged 4x-UltraSharp.pth upscale_models 2>/dev/null \
-      || dl lavinal712/UltraSharp-upscale-model 4x-UltraSharp.pth upscale_models
+    # SUPIR 检查点（fp16 pruned 版，免下 SDXL base 单文件省 6.9GB）
+    # SUPIR_model_loader_v2 只需 SUPIR 权重，底模 SDXL 由 CheckpointLoaderSimple 加载
+    dl Kijai/SUPIR_pruned             SUPIR-v0Q_fp16.safetensors       SUPIR
+    dl camenduru/SUPIR                SUPIR-v0Q.ckpt                   SUPIR 2>/dev/null || true
+    dl camenduru/SUPIR                sd_xl_base_1.0_0.9vae.safetensors checkpoints
+    # （yaml 配置已随 ComfyUI-SUPIR 仓库内置于 options/，无需单独下载）
+    dl philz1337x/upscaler 4x-UltraSharp.pth upscale_models 2>/dev/null \
+      || curl -fsSL -o "$MODELS/upscale_models/4x-UltraSharp.pth" https://huggingface.co/lokCX/4x-Ultrasharp/resolve/main/4x-UltraSharp.pth
     ;;
 esac
 

@@ -1,6 +1,6 @@
 {
-  "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "sd_xl_base_1.0.safetensors"}},
-  "2": {"class_type": "SUPIR_model_loader_v2", "inputs": {"model": ["1", 0], "clip": ["1", 1], "vae": ["1", 2], "supir_model": "SUPIR-v0q.ckpt", "fp8_unet": false, "diffusion_dtype": "auto"}},
+  "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "sd_xl_base_1.0_0.9vae.safetensors"}},
+  "2": {"class_type": "SUPIR_model_loader_v2", "inputs": {"model": ["1", 0], "clip": ["1", 1], "vae": ["1", 2], "supir_model": "SUPIR-v0Q_fp16.safetensors", "fp8_unet": false, "diffusion_dtype": "auto"}},
   "3": {"class_type": "LoadImage", "inputs": {"image": "example.png"}},
   "4": {"class_type": "SUPIR_first_stage", "inputs": {"SUPIR_VAE": ["2", 1], "image": ["3", 0], "use_tiled_vae": true, "encoder_tile_size": 1024, "decoder_tile_size": 768, "encoder_dtype": "auto"}},
   "5": {"class_type": "SUPIR_conditioner", "inputs": {"SUPIR_model": ["2", 0], "latents": ["4", 0], "positive_prompt": "high quality, detailed, sharp focus, photorealistic", "negative_prompt": "painting, oil painting, illustration, drawing, art, sketch, cartoon, anime, CG style, three-dimensional render, unlimited detail, extreme blur, low quality, lowres, grayscale, watermark, signature, mono, soft, blurry"}},
