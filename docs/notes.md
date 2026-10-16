@@ -9,3 +9,7 @@
    该步骤在容器内安装 NVIDIA 用户态库。若卡死，改用
    `podman exec comfyui <命令>` 直连操作，不影响使用。
 4. Bazzite 是不可变系统，所有运行时依赖装进容器，宿主机保持干净。
+5. **HuggingFace Xet 传输在国内网络会报 `CAS Client Error` 且速率极低**：
+   下载脚本已设 `HF_HUB_DISABLE_XET=1`，并自动探测 `HF_ENDPOINT`
+   （直连可用用官方，否则回退 `https://hf-mirror.com`），实测镜像 ~10MB/s。
+

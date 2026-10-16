@@ -6,6 +6,16 @@ set -euo pipefail
 REPO="${REPO:-/var/home/sym/Repo/comfyui}"
 MODELS="$REPO/ComfyUI/models"
 export HF_XET_HIGH_PERFORMANCE=1
+# 禁用 Xet（CAS 传输在国内网络常报 I/O 错误），并优先走 hf-mirror 镜像
+export HF_HUB_DISABLE_XET=1
+if [ -z "${HF_ENDPOINT:-}" ]; then
+  if curl -s -o /dev/null --max-time 8 -r 0-1048575 -L https://huggingface.co; then
+    export HF_ENDPOINT=https://huggingface.co
+  else
+    export HF_ENDPOINT=https://hf-mirror.com
+  fi
+fi
+echo "HF_ENDPOINT=$HF_ENDPOINT"
 source "$REPO/ComfyUI/.venv/bin/activate"
 
 pick=${1:-all}
