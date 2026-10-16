@@ -1,0 +1,186 @@
+{
+ "_comment": [
+  "SeedVR2 3B INT8 分片放大到长边 8K（ComfyUI 0.41 原生节点，无需第三方节点包）",
+  "流程: 长边缩放到 8192 -> 切成 1536 方块(重叠128) -> 逐片 SeedVR2 一步修复 -> 正弦羽化拼回",
+  "为什么分片: SeedVR2 采样显存随画面积线性增长(约 0.55GiB/百万像素 + 8.5GiB 固定开销),",
+  "  单张 8K(45-67MP) 整图采样需 >20GB 显存, 16GB 卡必 OOM; 分片后每片仅 1536^2 (2.4MP)",
+  "尺寸自适应: GetImageSize 把缩放后的真实宽高喂给 ImageMergeTileList, 任意长宽比都不用改参数",
+  "实测 RTX 5080 16GB: 8192x8192 约 106 秒, 峰值显存 14.8GB"
+ ],
+ "1": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "test.png"
+  }
+ },
+ "2": {
+  "class_type": "ImageScaleToMaxDimension",
+  "inputs": {
+   "image": [
+    "1",
+    0
+   ],
+   "upscale_method": "lanczos",
+   "largest_size": 8192
+  }
+ },
+ "3": {
+  "class_type": "SplitImageToTileList",
+  "inputs": {
+   "image": [
+    "2",
+    0
+   ],
+   "tile_width": 1536,
+   "tile_height": 1536,
+   "overlap": 128
+  }
+ },
+ "4": {
+  "class_type": "UNETLoader",
+  "inputs": {
+   "unet_name": "seedvr2_3b_int8_convrot.safetensors",
+   "weight_dtype": "default"
+  }
+ },
+ "5": {
+  "class_type": "VAELoader",
+  "inputs": {
+   "vae_name": "seedvr2_ema_vae_fp16.safetensors"
+  }
+ },
+ "6": {
+  "class_type": "SeedVR2Preprocess",
+  "inputs": {
+   "resized_images": [
+    "3",
+    0
+   ]
+  }
+ },
+ "7": {
+  "class_type": "VAEEncodeTiled",
+  "inputs": {
+   "pixels": [
+    "6",
+    0
+   ],
+   "vae": [
+    "5",
+    0
+   ],
+   "tile_size": 512,
+   "overlap": 128,
+   "temporal_size": 4096,
+   "temporal_overlap": 8
+  }
+ },
+ "8": {
+  "class_type": "SeedVR2Conditioning",
+  "inputs": {
+   "model": [
+    "4",
+    0
+   ],
+   "vae_conditioning": [
+    "7",
+    0
+   ]
+  }
+ },
+ "9": {
+  "class_type": "KSampler",
+  "inputs": {
+   "model": [
+    "4",
+    0
+   ],
+   "seed": 42,
+   "steps": 1,
+   "cfg": 1.0,
+   "sampler_name": "euler",
+   "scheduler": "simple",
+   "positive": [
+    "8",
+    0
+   ],
+   "negative": [
+    "8",
+    1
+   ],
+   "latent_image": [
+    "7",
+    0
+   ],
+   "denoise": 1.0
+  }
+ },
+ "10": {
+  "class_type": "VAEDecodeTiled",
+  "inputs": {
+   "samples": [
+    "9",
+    0
+   ],
+   "vae": [
+    "5",
+    0
+   ],
+   "tile_size": 512,
+   "overlap": 128,
+   "temporal_size": 4096,
+   "temporal_overlap": 8
+  }
+ },
+ "11": {
+  "class_type": "SeedVR2PostProcessing",
+  "inputs": {
+   "images": [
+    "10",
+    0
+   ],
+   "original_resized_images": [
+    "3",
+    0
+   ],
+   "color_correction_method": "none"
+  }
+ },
+ "14": {
+  "class_type": "GetImageSize",
+  "inputs": {
+   "image": [
+    "2",
+    0
+   ]
+  }
+ },
+ "12": {
+  "class_type": "ImageMergeTileList",
+  "inputs": {
+   "image_list": [
+    "11",
+    0
+   ],
+   "final_width": [
+    "14",
+    0
+   ],
+   "final_height": [
+    "14",
+    1
+   ],
+   "overlap": 128
+  }
+ },
+ "13": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "12",
+    0
+   ],
+   "filename_prefix": "SeedVR2_8K"
+  }
+ }
+}

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# 在 distrobox 容器内执行：下载 SUPIR + Flux Tile 放大工作流所需模型（约 30GB）
-# 可选参数: bash 03-download-models.sh [all|supir|flux]
+# 在 distrobox 容器内执行：下载 SUPIR + Flux Tile + SeedVR2 放大工作流所需模型（约 34GB）
+# 可选参数: bash 03-download-models.sh [all|supir|flux|seedvr2]
 set -euo pipefail
 
 REPO="${REPO:-/var/home/sym/Repo/comfyui}"
@@ -45,6 +45,18 @@ case "$pick" in
     # （yaml 配置已随 ComfyUI-SUPIR 仓库内置于 options/，无需单独下载）
     dl philz1337x/upscaler 4x-UltraSharp.pth upscale_models 2>/dev/null \
       || curl -fsSL -o "$MODELS/upscale_models/4x-UltraSharp.pth" https://huggingface.co/lokCX/4x-Ultrasharp/resolve/main/4x-UltraSharp.pth
+    ;;
+esac
+
+case "$pick" in
+  all|seedvr2)
+    # SeedVR2 3B INT8（ComfyUI 0.41 原生节点：一步式修复/放大，无需第三方节点包）
+    # 仓库内文件带 vae/ 与 diffusion_models/ 子目录，故以 models/ 为 local-dir 直接落位
+    echo ">>> Comfy-Org/SeedVR2 -> models/vae + models/diffusion_models"
+    hf download Comfy-Org/SeedVR2 \
+      vae/seedvr2_ema_vae_fp16.safetensors \
+      diffusion_models/seedvr2_3b_int8_convrot.safetensors \
+      --local-dir "$MODELS"
     ;;
 esac
 
