@@ -1,0 +1,789 @@
+{
+ "id": "b7f1c2a4-0d3e-4f56-9a7b-1c2d3e4f5a60",
+ "revision": 0,
+ "last_node_id": 14,
+ "last_link_id": 20,
+ "nodes": [
+  {
+   "id": 1,
+   "type": "LoadImage",
+   "pos": [
+    40,
+    40
+   ],
+   "size": [
+    340,
+    142
+   ],
+   "flags": {},
+   "order": 1,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      1
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "MASK",
+     "type": "MASK",
+     "links": [],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "LoadImage"
+   },
+   "widgets_values": [
+    "test.png",
+    "image"
+   ],
+   "title": "上传原图"
+  },
+  {
+   "id": 2,
+   "type": "ImageScaleToMaxDimension",
+   "pos": [
+    460,
+    40
+   ],
+   "size": [
+    340,
+    142
+   ],
+   "flags": {},
+   "order": 4,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 1
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      2,
+      20
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ImageScaleToMaxDimension"
+   },
+   "widgets_values": [
+    "lanczos",
+    8192
+   ],
+   "title": "长边缩放到 8192"
+  },
+  {
+   "id": 3,
+   "type": "SplitImageToTileList",
+   "pos": [
+    880,
+    40
+   ],
+   "size": [
+    340,
+    168
+   ],
+   "flags": {},
+   "order": 5,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 2
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      3,
+      15
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SplitImageToTileList"
+   },
+   "widgets_values": [
+    1536,
+    1536,
+    128
+   ],
+   "title": "切成 1536 分片(重叠128)"
+  },
+  {
+   "id": 4,
+   "type": "UNETLoader",
+   "pos": [
+    40,
+    300
+   ],
+   "size": [
+    340,
+    142
+   ],
+   "flags": {},
+   "order": 2,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "MODEL",
+     "type": "MODEL",
+     "links": [
+      6,
+      8
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "UNETLoader"
+   },
+   "widgets_values": [
+    "seedvr2_3b_int8_convrot.safetensors",
+    "default"
+   ]
+  },
+  {
+   "id": 5,
+   "type": "VAELoader",
+   "pos": [
+    40,
+    560
+   ],
+   "size": [
+    340,
+    116
+   ],
+   "flags": {},
+   "order": 3,
+   "mode": 0,
+   "inputs": [],
+   "outputs": [
+    {
+     "name": "VAE",
+     "type": "VAE",
+     "links": [
+      5,
+      13
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAELoader"
+   },
+   "widgets_values": [
+    "seedvr2_ema_vae_fp16.safetensors"
+   ]
+  },
+  {
+   "id": 6,
+   "type": "SeedVR2Preprocess",
+   "pos": [
+    1300,
+    40
+   ],
+   "size": [
+    340,
+    90
+   ],
+   "flags": {},
+   "order": 7,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "resized_images",
+     "type": "IMAGE",
+     "link": 3
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [
+      4
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SeedVR2Preprocess"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 7,
+   "type": "VAEEncodeTiled",
+   "pos": [
+    1720,
+    40
+   ],
+   "size": [
+    340,
+    194
+   ],
+   "flags": {},
+   "order": 8,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "pixels",
+     "type": "IMAGE",
+     "link": 4
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 5
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      7,
+      11
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEEncodeTiled"
+   },
+   "widgets_values": [
+    512,
+    128,
+    4096,
+    8
+   ]
+  },
+  {
+   "id": 8,
+   "type": "SeedVR2Conditioning",
+   "pos": [
+    2140,
+    40
+   ],
+   "size": [
+    340,
+    90
+   ],
+   "flags": {},
+   "order": 9,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 6
+    },
+    {
+     "name": "vae_conditioning",
+     "type": "LATENT",
+     "link": 7
+    }
+   ],
+   "outputs": [
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "links": [
+      9
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "links": [
+      10
+     ],
+     "slot_index": 1
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SeedVR2Conditioning"
+   },
+   "widgets_values": []
+  },
+  {
+   "id": 9,
+   "type": "KSampler",
+   "pos": [
+    2560,
+    40
+   ],
+   "size": [
+    340,
+    272
+   ],
+   "flags": {},
+   "order": 10,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "model",
+     "type": "MODEL",
+     "link": 8
+    },
+    {
+     "name": "positive",
+     "type": "CONDITIONING",
+     "link": 9
+    },
+    {
+     "name": "negative",
+     "type": "CONDITIONING",
+     "link": 10
+    },
+    {
+     "name": "latent_image",
+     "type": "LATENT",
+     "link": 11
+    }
+   ],
+   "outputs": [
+    {
+     "name": "LATENT",
+     "type": "LATENT",
+     "links": [
+      12
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "KSampler"
+   },
+   "widgets_values": [
+    42,
+    "fixed",
+    1,
+    1.0,
+    "euler",
+    "simple",
+    1.0
+   ],
+   "title": "SeedVR2 一步采样"
+  },
+  {
+   "id": 10,
+   "type": "VAEDecodeTiled",
+   "pos": [
+    2980,
+    40
+   ],
+   "size": [
+    340,
+    194
+   ],
+   "flags": {},
+   "order": 11,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "samples",
+     "type": "LATENT",
+     "link": 12
+    },
+    {
+     "name": "vae",
+     "type": "VAE",
+     "link": 13
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      14
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "VAEDecodeTiled"
+   },
+   "widgets_values": [
+    512,
+    128,
+    4096,
+    8
+   ]
+  },
+  {
+   "id": 11,
+   "type": "SeedVR2PostProcessing",
+   "pos": [
+    3400,
+    40
+   ],
+   "size": [
+    340,
+    116
+   ],
+   "flags": {},
+   "order": 12,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 14
+    },
+    {
+     "name": "original_resized_images",
+     "type": "IMAGE",
+     "link": 15
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [
+      16
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SeedVR2PostProcessing"
+   },
+   "widgets_values": [
+    "none"
+   ]
+  },
+  {
+   "id": 12,
+   "type": "ImageMergeTileList",
+   "pos": [
+    3820,
+    40
+   ],
+   "size": [
+    340,
+    168
+   ],
+   "flags": {},
+   "order": 13,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "image_list",
+     "type": "IMAGE",
+     "link": 16
+    },
+    {
+     "name": "final_width",
+     "type": "INT",
+     "link": 17,
+     "widget": {
+      "name": "final_width"
+     }
+    },
+    {
+     "name": "final_height",
+     "type": "INT",
+     "link": 18,
+     "widget": {
+      "name": "final_height"
+     }
+    }
+   ],
+   "outputs": [
+    {
+     "name": "IMAGE",
+     "type": "IMAGE",
+     "links": [
+      19
+     ],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "ImageMergeTileList"
+   },
+   "widgets_values": [
+    1024,
+    1024,
+    128
+   ],
+   "title": "正弦羽化拼回"
+  },
+  {
+   "id": 13,
+   "type": "SaveImage",
+   "pos": [
+    4240,
+    40
+   ],
+   "size": [
+    340,
+    116
+   ],
+   "flags": {},
+   "order": 14,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "link": 19
+    }
+   ],
+   "outputs": [
+    {
+     "name": "images",
+     "type": "IMAGE",
+     "links": [],
+     "slot_index": 0
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "SaveImage"
+   },
+   "widgets_values": [
+    "SeedVR2_8K"
+   ],
+   "title": "保存 8K 大图"
+  },
+  {
+   "id": 14,
+   "type": "GetImageSize",
+   "pos": [
+    880,
+    300
+   ],
+   "size": [
+    340,
+    90
+   ],
+   "flags": {},
+   "order": 6,
+   "mode": 0,
+   "inputs": [
+    {
+     "name": "image",
+     "type": "IMAGE",
+     "link": 20
+    }
+   ],
+   "outputs": [
+    {
+     "name": "width",
+     "type": "INT",
+     "links": [
+      17
+     ],
+     "slot_index": 0
+    },
+    {
+     "name": "height",
+     "type": "INT",
+     "links": [
+      18
+     ],
+     "slot_index": 1
+    },
+    {
+     "name": "batch_size",
+     "type": "INT",
+     "links": [],
+     "slot_index": 2
+    }
+   ],
+   "properties": {
+    "Node name for S&R": "GetImageSize"
+   },
+   "widgets_values": []
+  }
+ ],
+ "links": [
+  [
+   1,
+   1,
+   0,
+   2,
+   0,
+   "IMAGE"
+  ],
+  [
+   2,
+   2,
+   0,
+   3,
+   0,
+   "IMAGE"
+  ],
+  [
+   3,
+   3,
+   0,
+   6,
+   0,
+   "IMAGE"
+  ],
+  [
+   4,
+   6,
+   0,
+   7,
+   0,
+   "IMAGE"
+  ],
+  [
+   5,
+   5,
+   0,
+   7,
+   1,
+   "VAE"
+  ],
+  [
+   6,
+   4,
+   0,
+   8,
+   0,
+   "MODEL"
+  ],
+  [
+   7,
+   7,
+   0,
+   8,
+   1,
+   "LATENT"
+  ],
+  [
+   8,
+   4,
+   0,
+   9,
+   0,
+   "MODEL"
+  ],
+  [
+   9,
+   8,
+   0,
+   9,
+   1,
+   "CONDITIONING"
+  ],
+  [
+   10,
+   8,
+   1,
+   9,
+   2,
+   "CONDITIONING"
+  ],
+  [
+   11,
+   7,
+   0,
+   9,
+   3,
+   "LATENT"
+  ],
+  [
+   12,
+   9,
+   0,
+   10,
+   0,
+   "LATENT"
+  ],
+  [
+   13,
+   5,
+   0,
+   10,
+   1,
+   "VAE"
+  ],
+  [
+   14,
+   10,
+   0,
+   11,
+   0,
+   "IMAGE"
+  ],
+  [
+   15,
+   3,
+   0,
+   11,
+   1,
+   "IMAGE"
+  ],
+  [
+   16,
+   11,
+   0,
+   12,
+   0,
+   "IMAGE"
+  ],
+  [
+   17,
+   14,
+   0,
+   12,
+   1,
+   "INT"
+  ],
+  [
+   18,
+   14,
+   1,
+   12,
+   2,
+   "INT"
+  ],
+  [
+   19,
+   12,
+   0,
+   13,
+   0,
+   "IMAGE"
+  ],
+  [
+   20,
+   2,
+   0,
+   14,
+   0,
+   "IMAGE"
+  ]
+ ],
+ "groups": [],
+ "config": {},
+ "extra": {},
+ "version": 0.4
+}

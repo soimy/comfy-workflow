@@ -32,7 +32,7 @@ bash scripts/04-launch.sh   # http://127.0.0.1:8188
 
 ## SeedVR2 分片放大（长边 8K）
 
-`workflows/seedvr2_tile_upscale_api.json`
+`workflows/seedvr2_tile_upscale_api.json`（HTTP/脚本）· `workflows/seedvr2_tile_upscale_ui.json`（画布）
 
 ```
 LoadImage → 长边缩放到 8192(lanczos) → 切 1536×1536 分片(重叠 128)
@@ -68,25 +68,43 @@ SeedVR2 是 **1:1 修复**模型（VAE 空间下采样 8 倍，进出一致）�
   若分片之间有轻微色调差，改成 `lab`（更忠实，但逐片各做一次色彩迁移，显存和耗时略增）。
 - 想换 7B 模型：`UNETLoader` 改成 `seedvr2_7b_int8_convrot.safetensors`（7.76GB，质量更好、更吃显存）。
 
+## 两种工作流格式（踩坑重点）
+
+仓库里每套流程都有两份文件，**用途不同、不能混用**：
+
+| 文件 | 格式 | 用在哪 |
+|---|---|---|
+| `workflows/seedvr2_tile_upscale_api.json` | API（顶层是 `{"1": {"class_type": ...}}`） | 脚本 / HTTP `/prompt` |
+| `workflows/seedvr2_tile_upscale_ui.json` | 节点图（顶层是 `nodes` / `links`） | 画布导入、侧边栏预置 |
+
+**侧边栏预置必须是节点图格式**。从侧边栏点开工作流走的是
+`workflowService.openWorkflow → app.loadGraphData(...)`，这条路上**没有** `isApiJson()` 判定
+（那个判定只在拖拽文件/读 PNG 元数据那条路上），它会直接当节点图解析并访问 `graphData.nodes`。
+API 格式没有 `nodes` 字段，于是前端抛 `TypeError: e is not iterable`。
+另外 API 格式顶层**不要加 `_comment` 之类的字段**，`isApiJson()` 的规则是
+「所有顶层值都必须是带 `class_type` 的对象」，多一个数组字段就会退化成按节点图解析然后报错。
+
 ## 面板预置工作流
 
-ComfyUI 侧边栏读的是 `ComfyUI/user/default/workflows/`，而该目录在 submodule 里被 gitignore，
+ComfyUI 侧边栏读的是 `ComfyUI/user/default/workflows/`，该目录在 submodule 里被 gitignore，
 所以预置文件不入库，换机器/重装要再放一次（复制过去即出现在面板里，无需重启）：
 
 ```bash
-cp workflows/seedvr2_tile_upscale_api.json "ComfyUI/user/default/workflows/App - SeedVR2 8K 分片放大.json"
-cp workflows/flux_tile_upscale_api.json    "ComfyUI/user/default/workflows/App - Flux Tile 放大.json"
-cp workflows/supir_upscale_api.json        "ComfyUI/user/default/workflows/App - SUPIR 放大.json"
+cp workflows/seedvr2_tile_upscale_ui.json "ComfyUI/user/default/workflows/App - SeedVR2 8K 分片放大.json"
+cp workflows/flux_tile_upscale_api.json  "ComfyUI/user/default/workflows/App - Flux Tile 放大.json"
+cp workflows/supir_upscale_api.json      "ComfyUI/user/default/workflows/App - SUPIR 放大.json"
 ```
 
-> 这三份都是 API 格式 JSON，前端会先跑 `isApiJson()` 判定、命中后走 `loadApiJson()` 自动生成节点图，
-> 所以画布导入和 `/prompt` 用的是同一份文件。**不要在最外层加 `_comment` 之类字段**：
-> 判定规则是「所有顶层值都必须是带 `class_type` 的对象」，多一个数组字段就会退化成按节点图解析然后报错。
+> 后两份用的是 `SimpleUpscale` 单节点 App（本身是节点图，直接复制即可）。
+> SeedVR2 这份由 `seedvr2_tile_upscale_api.json` 生成，生成脚本会：
+> 用 `/object_info` 判定每个入参是 widget 还是连线、把「被转成输入的 widget」
+> 序列化成 `{"name": ..., "widget": {"name": ...}, "link": ...}` 并保留占位值、
+> 计算拓扑 `order` 与布局；转换后再反向还原成 API 格式与原文件逐字段比对，确保语义一致。
 
 ## 目录
 
 ```
 scripts/   01 容器 → 02 安装 → 03 模型 → 04 启动
-workflows/ 工作流 JSON（ComfyUI 中 Load 导入）
+workflows/ *_api.json = HTTP/脚本用；*_ui.json = 画布/面板预置用
 ComfyUI/   运行时目录（大文件不入库）
 ```

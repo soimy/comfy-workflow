@@ -30,4 +30,18 @@
    `SeedVR2PostProcessing` 再把宽高裁到偶数。用 1536 这类尺寸可以保证拼图时每片尺寸一致。
 10. **ComfyUI 的模型列表按目录 mtime 自动失效**：新下载的模型不用重启服务，
     `/object_info/UNETLoader` 立刻就能看到。
+11. **工作流有两套格式，侧边栏预置必须是「节点图」格式**：
+    从侧边栏点开工作流走 `workflowService.openWorkflow → app.loadGraphData(...)`，
+    这条路上**没有** `isApiJson()` 判定（只在拖拽 JSON/读 PNG 元数据那条路上有），
+    会直接当节点图解析并访问 `graphData.nodes`；API 格式（顶层 `{"1":{"class_type":...}}`）
+    没有 `nodes` 字段，前端就抛 `TypeError: e is not iterable`。
+    结论：`workflows/*_api.json` 只给 HTTP `/prompt` 用，画布/预置要另存一份节点图格式。
+12. **API 格式顶层不能加 `_comment` 之类字段**：`isApiJson()` 的规则是
+    「所有顶层值都必须是带 `class_type` 的对象」（`app.ts` 里还要求 `inputs` 是普通对象），
+    多一个数组字段就会判定失败、退化成按节点图解析然后报错。
+13. **「widget 被转成输入」的序列化写法**（照着官方模板 `audio_ace_step1_5_xl_base.json` 里
+    KSampler 的 seed 抄的）：该入参出现在 `node.inputs` 里并带 `"widget": {"name": "seed"}`，
+    同时在 `widgets_values` 里**仍占一个位置**（放默认值即可，实际取链接值）。
+    另外 `KSampler` 的 seed 后面前端会多注入一个 `control_after_generate` widget，
+    `LoadImage` 的图片上传按钮也算一个 widget（值 `"image"`）。
 
