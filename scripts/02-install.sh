@@ -32,6 +32,8 @@ CUSTOM="$COMFY/custom_nodes"
 [ -d "$CUSTOM/ComfyUI_UltimateSDUpscale" ] || git clone --depth 1 https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git "$CUSTOM/ComfyUI_UltimateSDUpscale"
 [ -d "$CUSTOM/ComfyUI-TiledDiffusion" ]    || git clone --depth 1 https://github.com/shiimizu/ComfyUI-TiledDiffusion.git    "$CUSTOM/ComfyUI-TiledDiffusion"
 pip install -q -r "$CUSTOM/ComfyUI-SUPIR/requirements.txt"
+# SUPIR 节点按 transformers v4 的 CLIPTextModel.text_model 结构访问，v5 会崩
+pip install -q "transformers<5"
 pip install -q -r "$CUSTOM/ComfyUI-Manager/requirements.txt"
 
 echo "==> [5/5] 安装 huggingface 下载工具"

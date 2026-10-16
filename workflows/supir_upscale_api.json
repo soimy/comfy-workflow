@@ -1,10 +1,127 @@
 {
-  "1": {"class_type": "CheckpointLoaderSimple", "inputs": {"ckpt_name": "sd_xl_base_1.0_0.9vae.safetensors"}},
-  "2": {"class_type": "SUPIR_model_loader_v2", "inputs": {"model": ["1", 0], "clip": ["1", 1], "vae": ["1", 2], "supir_model": "SUPIR-v0Q_fp16.safetensors", "fp8_unet": false, "diffusion_dtype": "auto"}},
-  "3": {"class_type": "LoadImage", "inputs": {"image": "example.png"}},
-  "4": {"class_type": "SUPIR_first_stage", "inputs": {"SUPIR_VAE": ["2", 1], "image": ["3", 0], "use_tiled_vae": true, "encoder_tile_size": 1024, "decoder_tile_size": 768, "encoder_dtype": "auto"}},
-  "5": {"class_type": "SUPIR_conditioner", "inputs": {"SUPIR_model": ["2", 0], "latents": ["4", 0], "positive_prompt": "high quality, detailed, sharp focus, photorealistic", "negative_prompt": "painting, oil painting, illustration, drawing, art, sketch, cartoon, anime, CG style, three-dimensional render, unlimited detail, extreme blur, low quality, lowres, grayscale, watermark, signature, mono, soft, blurry"}},
-  "6": {"class_type": "SUPIR_sample", "inputs": {"SUPIR_model": ["2", 0], "latents": ["4", 0], "positive": ["5", 0], "negative": ["5", 1], "seed": 42, "steps": 50, "cfg_scale_start": 4.0, "cfg_scale_end": 4.0, "EDM_s_churn": 5, "s_noise": 1.003, "DPMPP_eta": 1.0, "control_scale_start": 0.7, "control_scale_end": 0.8, "restore_cfg": 4.0, "keep_model_loaded": true, "sampler": "RestoreEDMSampler", "sampler_tile_size": 1024, "sampler_tile_stride": 512}},
-  "7": {"class_type": "SUPIR_decode", "inputs": {"SUPIR_VAE": ["2", 1], "latents": ["6", 0], "use_tiled_vae": true, "decoder_tile_size": 768, "decoder_dtype": "auto"}},
-  "8": {"class_type": "SaveImage", "inputs": {"images": ["7", 0], "filename_prefix": "SUPIR_upscale"}}
+ "1": {
+  "class_type": "CheckpointLoaderSimple",
+  "inputs": {
+   "ckpt_name": "sd_xl_base_1.0_0.9vae.safetensors"
+  }
+ },
+ "2": {
+  "class_type": "SUPIR_model_loader_v2",
+  "inputs": {
+   "model": [
+    "1",
+    0
+   ],
+   "clip": [
+    "1",
+    1
+   ],
+   "vae": [
+    "1",
+    2
+   ],
+   "supir_model": "SUPIR-v0Q_fp16.safetensors",
+   "fp8_unet": false,
+   "diffusion_dtype": "auto"
+  }
+ },
+ "3": {
+  "class_type": "LoadImage",
+  "inputs": {
+   "image": "test.png"
+  }
+ },
+ "4": {
+  "class_type": "SUPIR_first_stage",
+  "inputs": {
+   "SUPIR_VAE": [
+    "2",
+    1
+   ],
+   "image": [
+    "3",
+    0
+   ],
+   "use_tiled_vae": true,
+   "encoder_tile_size": 1024,
+   "decoder_tile_size": 768,
+   "encoder_dtype": "auto"
+  }
+ },
+ "5": {
+  "class_type": "SUPIR_conditioner",
+  "inputs": {
+   "SUPIR_model": [
+    "2",
+    0
+   ],
+   "latents": [
+    "4",
+    2
+   ],
+   "positive_prompt": "high quality, detailed, sharp focus, photorealistic",
+   "negative_prompt": "painting, oil painting, illustration, drawing, art, sketch, cartoon, anime, CG style, three-dimensional render, extreme blur, low quality, lowres, grayscale, watermark, signature, soft, blurry"
+  }
+ },
+ "6": {
+  "class_type": "SUPIR_sample",
+  "inputs": {
+   "SUPIR_model": [
+    "2",
+    0
+   ],
+   "latents": [
+    "4",
+    2
+   ],
+   "positive": [
+    "5",
+    0
+   ],
+   "negative": [
+    "5",
+    1
+   ],
+   "seed": 42,
+   "steps": 50,
+   "cfg_scale_start": 4.0,
+   "cfg_scale_end": 4.0,
+   "EDM_s_churn": 5,
+   "s_noise": 1.003,
+   "DPMPP_eta": 1.0,
+   "control_scale_start": 0.7,
+   "control_scale_end": 0.8,
+   "restore_cfg": 4.0,
+   "keep_model_loaded": true,
+   "sampler": "RestoreEDMSampler",
+   "sampler_tile_size": 1024,
+   "sampler_tile_stride": 512
+  }
+ },
+ "7": {
+  "class_type": "SUPIR_decode",
+  "inputs": {
+   "SUPIR_VAE": [
+    "2",
+    1
+   ],
+   "latents": [
+    "6",
+    0
+   ],
+   "use_tiled_vae": true,
+   "decoder_tile_size": 768,
+   "decoder_dtype": "auto"
+  }
+ },
+ "8": {
+  "class_type": "SaveImage",
+  "inputs": {
+   "images": [
+    "7",
+    0
+   ],
+   "filename_prefix": "SUPIR_upscale"
+  }
+ }
 }
