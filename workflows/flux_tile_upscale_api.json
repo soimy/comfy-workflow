@@ -2,7 +2,7 @@
   "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "flux1-dev-fp8.safetensors", "weight_dtype": "fp8_e4m3fn"}},
   "2": {"class_type": "DualCLIPLoader", "inputs": {"clip_name1": "clip_l.safetensors", "clip_name2": "t5xxl_fp8_e4m3fn.safetensors", "type": "flux"}},
   "3": {"class_type": "VAELoader", "inputs": {"vae_name": "ae.safetensors"}},
-  "4": {"class_type": "LoadImage", "inputs": {"image": "example.png"}},
+  "4": {"class_type": "LoadImage", "inputs": {"image": "test.png"}},
   "5": {"class_type": "ImageScaleBy", "inputs": {"image": ["4", 0], "upscale_method": "lanczos", "scale_by": 2.0}},
   "6": {"class_type": "CLIPTextEncode", "inputs": {"text": "sharp focus, highly detailed, high quality photo", "clip": ["2", 0]}},
   "7": {"class_type": "FluxGuidance", "inputs": {"conditioning": ["6", 0], "guidance": 2.5}},
