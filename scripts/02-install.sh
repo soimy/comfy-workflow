@@ -31,6 +31,16 @@ CUSTOM="$COMFY/custom_nodes"
 [ -d "$CUSTOM/ComfyUI-SUPIR" ]   || git clone --depth 1 https://github.com/kijai/ComfyUI-SUPIR.git   "$CUSTOM/ComfyUI-SUPIR"
 [ -d "$CUSTOM/ComfyUI_UltimateSDUpscale" ] || git clone --depth 1 https://github.com/ssitu/ComfyUI_UltimateSDUpscale.git "$CUSTOM/ComfyUI_UltimateSDUpscale"
 [ -d "$CUSTOM/ComfyUI-TiledDiffusion" ]    || git clone --depth 1 https://github.com/shiimizu/ComfyUI-TiledDiffusion.git    "$CUSTOM/ComfyUI-TiledDiffusion"
+
+# 本仓库自带的节点（custom_nodes/ 在仓库根目录，不放在 ComfyUI submodule 里）
+# 用软链接挂进 ComfyUI，避免把代码写进 submodule 导致无法推送/复现
+for d in "$REPO"/custom_nodes/*/; do
+  [ -d "$d" ] || continue
+  name=$(basename "$d")
+  [ -e "$CUSTOM/$name" ] || ln -s "${d%/}" "$CUSTOM/$name"
+  echo "    已挂载自定义节点: $name"
+done
+
 pip install -q -r "$CUSTOM/ComfyUI-SUPIR/requirements.txt"
 # SUPIR 节点按 transformers v4 的 CLIPTextModel.text_model 结构访问，v5 会崩
 pip install -q "transformers<5"

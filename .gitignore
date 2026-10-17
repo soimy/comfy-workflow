@@ -21,3 +21,4 @@ ComfyUI/models/**
 
 # 自定义节点里各自的运行缓存
 ComfyUI/custom_nodes/*/__pycache__/
+custom_nodes/*/__pycache__/
