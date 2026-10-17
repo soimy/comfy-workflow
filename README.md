@@ -68,6 +68,58 @@ SeedVR2 是 **1:1 修复**模型（VAE 空间下采样 8 倍，进出一致）�
   若分片之间有轻微色调差，改成 `lab`（更忠实，但逐片各做一次色彩迁移，显存和耗时略增）。
 - 想换 7B 模型：`UNETLoader` 改成 `seedvr2_7b_int8_convrot.safetensors`（7.76GB，质量更好、更吃显存）。
 
+## SeedVR2 分片放大 v2（尺寸自适应 + 子图封装）
+
+`workflows/seedvr2_tile_upscale_v2.json`（画布）· 面板预置名 **「App - SeedVR2 8K 分片放大 v2」**
+
+相比 v1 的两处改动：
+
+1. **两个参数，自动取小**——`目标最长边(上限)` 与 `缩放倍率` 二选一生效，实际取算出来较小的那个：
+
+```
+LoadImage ─┬─> GetImageSize ─宽/高─┐
+           │                      ├─> ComfyMathExpression ─INT─> ImageScaleToMaxDimension.largest_size
+           └──────────────────────┘         ↑        ↑
+                                    缩放倍率        目标最长边(上限)
+                                  PrimitiveFloat    PrimitiveInt
+```
+
+表达式 `min(d, round(max(a, b) * c))`（a/b=原图宽高，c=倍率，d=上限），
+用自带 `ComfyMathExpression`（底层 `simpleeval`，`min/max/round` 都在白名单）。
+
+| 原图 | 倍率 | 上限 | 实际长边 |
+|---|---|---|---|
+| 2102×1554 | 4.0 | 8192 | **8192**（4× 会到 8408，被上限截住） |
+| 2102×1554 | 2.0 | 8192 | **4204** |
+| 1000×800 | 4.0 | 8192 | **4000**（小图吃满倍率，不被硬拉到 8192） |
+| 2102×1554 | 4.0 | 4096 | **4096** |
+
+> v1 的坑：`largest_size` 写死 8192，小图会被 lanczos 硬放大到 8192 再分片，白跑分片且糊。
+
+2. **中间节点封装成子图**「SeedVR2 3B Int8 分片放大」，对照官方 `utility_seedvr2_3b_int8_upscale_image` 的粒度：
+   装进去的是 UNETLoader / VAELoader / SeedVR2Preprocess / VAEEncodeTiled / SeedVR2Conditioning /
+   KSampler / VAEDecodeTiled / SeedVR2PostProcessing；提升到外层面板的控件是
+   `unet_name`·`vae_name`·`seed`·`sampler_name`·`scheduler`·`denoise`·`color_correction_method`。
+
+   **缩放/切分/合并留在子图外**——必须先放大再切分，反过来（切完各放 4 倍）单块就爆了。
+
+### 子图 JSON 的几条隐含约定
+
+改子图相关文件时注意（都是从 624 份官方模板反推、再用校验脚本确认的）：
+
+- 子图输入的 `linkIds` 里，`link.origin_id` 是 `-10`（输入代理）、`origin_slot` 等于该输入在
+  `subgraphs[].inputs` 数组里的**下标**；输出端对称，`origin_slot` 用 `-20`。
+- **只有带 `label` 的子图输入才会同时出现在外层节点的 `inputs` 里**（官方那份 10 个输入里
+  仅 `resize_type.multiplier` 带 label，外层节点 inputs 里也就只有它）。
+- 被提升成控件的入参要同时：子图输入加 `label`、内部节点入参加
+  `{"widget": {"name": ...}}`、外层节点 `properties.proxyWidgets` 记 `[内部节点id, 控件名]`；
+  三者顺序必须一致。
+- `widgets_values` 里**仍要保留被提升控件的占位值**（如 KSampler 的 seed/denoise）。
+- 校验脚本思路：连线双向登记（节点 `outputs[].links` 与链接表互查）、槽位索引一致、
+  类型兼容、节点类型存在于 `/object_info`、子图键集合与官方模板逐键比对。
+
+> 子图展开是浏览器侧行为，headless 测不到；结构可机械验证，**首次用前请在界面里跑一次**。
+
 ## 两种工作流格式（踩坑重点）
 
 仓库里每套流程都有两份文件，**用途不同、不能混用**：
@@ -91,6 +143,7 @@ ComfyUI 侧边栏读的是 `ComfyUI/user/default/workflows/`，该目录在 subm
 
 ```bash
 cp workflows/seedvr2_tile_upscale_ui.json "ComfyUI/user/default/workflows/App - SeedVR2 8K 分片放大.json"
+cp workflows/seedvr2_tile_upscale_v2.json "ComfyUI/user/default/workflows/App - SeedVR2 8K 分片放大 v2.json"
 cp workflows/flux_tile_upscale_api.json  "ComfyUI/user/default/workflows/App - Flux Tile 放大.json"
 cp workflows/supir_upscale_api.json      "ComfyUI/user/default/workflows/App - SUPIR 放大.json"
 ```

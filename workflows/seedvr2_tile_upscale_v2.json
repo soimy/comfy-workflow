@@ -1,0 +1,1465 @@
+{
+  "id": "c247a705-b60f-465e-a166-1f3661601010",
+  "revision": 0,
+  "last_node_id": 66,
+  "last_link_id": 26,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "LoadImage",
+      "pos": [
+        40,
+        40
+      ],
+      "size": [
+        340,
+        142
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            1,
+            21
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": [],
+          "slot_index": 1
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0"
+      },
+      "widgets_values": [
+        "展厅喷绘-正面 copy.jpg",
+        "image"
+      ],
+      "title": "上传原图",
+      "order": 1
+    },
+    {
+      "id": 15,
+      "type": "GetImageSize",
+      "pos": [
+        440,
+        240
+      ],
+      "size": [
+        340,
+        90
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 21
+        }
+      ],
+      "outputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [
+            22
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            23
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "batch_size",
+          "type": "INT",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GetImageSize",
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0"
+      },
+      "widgets_values": [],
+      "title": "原图尺寸",
+      "order": 2
+    },
+    {
+      "id": 16,
+      "type": "PrimitiveInt",
+      "pos": [
+        440,
+        380
+      ],
+      "size": [
+        340,
+        82
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            25
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PrimitiveInt",
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0"
+      },
+      "widgets_values": [
+        8192,
+        "fixed"
+      ],
+      "title": "目标最长边(上限)",
+      "order": 3
+    },
+    {
+      "id": 17,
+      "type": "PrimitiveFloat",
+      "pos": [
+        440,
+        500
+      ],
+      "size": [
+        340,
+        82
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            24
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "PrimitiveFloat",
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0"
+      },
+      "widgets_values": [
+        4.0
+      ],
+      "title": "缩放倍率",
+      "order": 4
+    },
+    {
+      "id": 18,
+      "type": "ComfyMathExpression",
+      "pos": [
+        860,
+        240
+      ],
+      "size": [
+        360,
+        200
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "values.a",
+          "name": "values.a",
+          "type": "FLOAT,INT,BOOLEAN",
+          "label": "a",
+          "link": 22
+        },
+        {
+          "localized_name": "values.b",
+          "name": "values.b",
+          "type": "FLOAT,INT,BOOLEAN",
+          "label": "b",
+          "link": 23,
+          "shape": 7
+        },
+        {
+          "localized_name": "values.c",
+          "name": "values.c",
+          "type": "FLOAT,INT,BOOLEAN",
+          "label": "c",
+          "link": 24,
+          "shape": 7
+        },
+        {
+          "localized_name": "values.d",
+          "name": "values.d",
+          "type": "FLOAT,INT,BOOLEAN",
+          "label": "d",
+          "link": 25,
+          "shape": 7
+        }
+      ],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": null,
+          "slot_index": 0
+        },
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            26
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "BOOL",
+          "type": "BOOLEAN",
+          "links": null,
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ComfyMathExpression",
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0"
+      },
+      "widgets_values": [
+        "min(d, round(max(a, b) * c))"
+      ],
+      "title": "取较小分辨率 min(上限, 倍率×长边)",
+      "order": 5
+    },
+    {
+      "id": 2,
+      "type": "ImageScaleToMaxDimension",
+      "pos": [
+        1300,
+        40
+      ],
+      "size": [
+        340,
+        142
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 1
+        },
+        {
+          "localized_name": "largest_size",
+          "name": "largest_size",
+          "type": "INT",
+          "widget": {
+            "name": "largest_size"
+          },
+          "link": 26
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            2,
+            20
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageScaleToMaxDimension",
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0"
+      },
+      "widgets_values": [
+        "lanczos",
+        8192
+      ],
+      "title": "长边缩放到目标",
+      "order": 6
+    },
+    {
+      "id": 3,
+      "type": "SplitImageToTileList",
+      "pos": [
+        1720,
+        40
+      ],
+      "size": [
+        340,
+        168
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            3
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SplitImageToTileList",
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0"
+      },
+      "widgets_values": [
+        1536,
+        1536,
+        128
+      ],
+      "title": "切成 1536 分片(重叠128)",
+      "order": 7
+    },
+    {
+      "id": 14,
+      "type": "GetImageSize",
+      "pos": [
+        1300,
+        240
+      ],
+      "size": [
+        340,
+        90
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 20
+        }
+      ],
+      "outputs": [
+        {
+          "name": "width",
+          "type": "INT",
+          "links": [
+            17
+          ],
+          "slot_index": 0
+        },
+        {
+          "name": "height",
+          "type": "INT",
+          "links": [
+            18
+          ],
+          "slot_index": 1
+        },
+        {
+          "name": "batch_size",
+          "type": "INT",
+          "links": [],
+          "slot_index": 2
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "GetImageSize",
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0"
+      },
+      "widgets_values": [],
+      "title": "缩放后尺寸(供合并用)",
+      "order": 8
+    },
+    {
+      "id": 66,
+      "type": "a7c41e93-2f68-4d1b-8e57-93b0c5f2d41a",
+      "pos": [
+        2140,
+        40
+      ],
+      "size": [
+        420,
+        300
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image",
+          "name": "image",
+          "type": "IMAGE",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            16
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0",
+        "proxyWidgets": [
+          [
+            "4",
+            "unet_name"
+          ],
+          [
+            "5",
+            "vae_name"
+          ],
+          [
+            "9",
+            "seed"
+          ],
+          [
+            "9",
+            "sampler_name"
+          ],
+          [
+            "9",
+            "scheduler"
+          ],
+          [
+            "9",
+            "denoise"
+          ],
+          [
+            "11",
+            "color_correction_method"
+          ]
+        ]
+      },
+      "widgets_values": [],
+      "order": 9
+    },
+    {
+      "id": 12,
+      "type": "ImageMergeTileList",
+      "pos": [
+        2640,
+        40
+      ],
+      "size": [
+        340,
+        168
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "image_list",
+          "name": "image_list",
+          "type": "IMAGE",
+          "link": 16
+        },
+        {
+          "localized_name": "final_width",
+          "name": "final_width",
+          "type": "INT",
+          "widget": {
+            "name": "final_width"
+          },
+          "link": 17
+        },
+        {
+          "localized_name": "final_height",
+          "name": "final_height",
+          "type": "INT",
+          "widget": {
+            "name": "final_height"
+          },
+          "link": 18
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            19
+          ],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "ImageMergeTileList",
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        128
+      ],
+      "title": "合并分片",
+      "order": 10
+    },
+    {
+      "id": 13,
+      "type": "SaveImage",
+      "pos": [
+        3060,
+        40
+      ],
+      "size": [
+        340,
+        116
+      ],
+      "flags": {},
+      "mode": 0,
+      "inputs": [
+        {
+          "localized_name": "images",
+          "name": "images",
+          "type": "IMAGE",
+          "link": 19
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [],
+          "slot_index": 0
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveImage",
+        "cnr_id": "comfy-core",
+        "ver": "0.41.0"
+      },
+      "widgets_values": [
+        "SeedVR2_8K"
+      ],
+      "title": "保存大图",
+      "order": 11
+    }
+  ],
+  "links": [
+    [
+      1,
+      1,
+      0,
+      2,
+      0,
+      "IMAGE"
+    ],
+    [
+      2,
+      2,
+      0,
+      3,
+      0,
+      "IMAGE"
+    ],
+    [
+      3,
+      3,
+      0,
+      66,
+      0,
+      "IMAGE"
+    ],
+    [
+      16,
+      66,
+      0,
+      12,
+      0,
+      "IMAGE"
+    ],
+    [
+      17,
+      14,
+      0,
+      12,
+      1,
+      "INT"
+    ],
+    [
+      18,
+      14,
+      1,
+      12,
+      2,
+      "INT"
+    ],
+    [
+      19,
+      12,
+      0,
+      13,
+      0,
+      "IMAGE"
+    ],
+    [
+      20,
+      2,
+      0,
+      14,
+      0,
+      "IMAGE"
+    ],
+    [
+      21,
+      1,
+      0,
+      15,
+      0,
+      "IMAGE"
+    ],
+    [
+      22,
+      15,
+      0,
+      18,
+      0,
+      "INT"
+    ],
+    [
+      23,
+      15,
+      1,
+      18,
+      1,
+      "INT"
+    ],
+    [
+      24,
+      17,
+      0,
+      18,
+      2,
+      "FLOAT"
+    ],
+    [
+      25,
+      16,
+      0,
+      18,
+      3,
+      "INT"
+    ],
+    [
+      26,
+      18,
+      1,
+      2,
+      1,
+      "INT"
+    ]
+  ],
+  "groups": [],
+  "definitions": {
+    "subgraphs": [
+      {
+        "id": "a7c41e93-2f68-4d1b-8e57-93b0c5f2d41a",
+        "version": 1,
+        "state": {
+          "lastGroupId": 1,
+          "lastNodeId": 11,
+          "lastLinkId": 121,
+          "lastRerouteId": 0
+        },
+        "revision": 0,
+        "config": {},
+        "name": "SeedVR2 3B Int8 分片放大",
+        "inputNode": {
+          "id": -10,
+          "bounding": [
+            20,
+            20,
+            189.13,
+            160.0
+          ]
+        },
+        "outputNode": {
+          "id": -20,
+          "bounding": [
+            2900,
+            40,
+            128,
+            68
+          ]
+        },
+        "inputs": [
+          {
+            "id": "100a6372-0da0-4c6f-8e69-9197ad280200",
+            "name": "image",
+            "type": "IMAGE",
+            "linkIds": [
+              112,
+              113
+            ],
+            "pos": [
+              20,
+              30.0
+            ],
+            "localized_name": "image"
+          },
+          {
+            "id": "ab4d3348-2043-4dd7-8572-cd21e57242a1",
+            "name": "unet_name",
+            "type": "COMBO",
+            "linkIds": [
+              114
+            ],
+            "pos": [
+              20,
+              50.0
+            ]
+          },
+          {
+            "id": "7845a72e-ff4a-4370-bb3d-c8b86376a291",
+            "name": "vae_name",
+            "type": "COMBO",
+            "linkIds": [
+              115
+            ],
+            "pos": [
+              20,
+              70.0
+            ]
+          },
+          {
+            "id": "b269c538-6e03-4ba1-bdcd-c2ba35e2127f",
+            "name": "seed",
+            "type": "INT",
+            "linkIds": [
+              116
+            ],
+            "pos": [
+              20,
+              90.0
+            ]
+          },
+          {
+            "id": "1fa1de58-6aa3-4131-b5a5-77ce73be22a9",
+            "name": "sampler_name",
+            "type": "COMBO",
+            "linkIds": [
+              117
+            ],
+            "pos": [
+              20,
+              110.0
+            ]
+          },
+          {
+            "id": "6cabd4b1-d95a-45a1-b7fb-69177a2258dd",
+            "name": "scheduler",
+            "type": "COMBO",
+            "linkIds": [
+              118
+            ],
+            "pos": [
+              20,
+              130.0
+            ]
+          },
+          {
+            "id": "a7387992-ce47-4887-b321-22ca3181c0f8",
+            "name": "denoise",
+            "type": "FLOAT",
+            "linkIds": [
+              119
+            ],
+            "pos": [
+              20,
+              150.0
+            ]
+          },
+          {
+            "id": "ba3aeda0-6ddb-4a34-b102-fbf4e0a4ea65",
+            "name": "color_correction_method",
+            "type": "COMBO",
+            "linkIds": [
+              120
+            ],
+            "pos": [
+              20,
+              170.0
+            ]
+          }
+        ],
+        "outputs": [
+          {
+            "id": "1687e487-c3cf-4a0d-a117-771e84b8f8a0",
+            "name": "images",
+            "type": "IMAGE",
+            "linkIds": [
+              121
+            ],
+            "localized_name": "images",
+            "pos": [
+              2920,
+              60
+            ]
+          }
+        ],
+        "widgets": [],
+        "nodes": [
+          {
+            "id": 4,
+            "type": "UNETLoader",
+            "pos": [
+              40,
+              40
+            ],
+            "size": [
+              340,
+              142
+            ],
+            "flags": {},
+            "order": 0,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "unet_name",
+                "name": "unet_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "unet_name"
+                },
+                "link": 114
+              }
+            ],
+            "outputs": [
+              {
+                "name": "MODEL",
+                "type": "MODEL",
+                "links": [
+                  103,
+                  105
+                ],
+                "slot_index": 0
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "UNETLoader"
+            },
+            "widgets_values": [
+              "seedvr2_3b_int8_convrot.safetensors",
+              "default"
+            ],
+            "title": "加载 UNET(SeedVR2 3B Int8)"
+          },
+          {
+            "id": 5,
+            "type": "VAELoader",
+            "pos": [
+              40,
+              260
+            ],
+            "size": [
+              340,
+              116
+            ],
+            "flags": {},
+            "order": 1,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "vae_name",
+                "name": "vae_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "vae_name"
+                },
+                "link": 115
+              }
+            ],
+            "outputs": [
+              {
+                "name": "VAE",
+                "type": "VAE",
+                "links": [
+                  102,
+                  110
+                ],
+                "slot_index": 0
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "VAELoader"
+            },
+            "widgets_values": [
+              "seedvr2_ema_vae_fp16.safetensors"
+            ],
+            "title": "加载 VAE"
+          },
+          {
+            "id": 6,
+            "type": "SeedVR2Preprocess",
+            "pos": [
+              420,
+              60
+            ],
+            "size": [
+              340,
+              90
+            ],
+            "flags": {},
+            "order": 2,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "resized_images",
+                "name": "resized_images",
+                "type": "IMAGE",
+                "link": 112
+              }
+            ],
+            "outputs": [
+              {
+                "name": "images",
+                "type": "IMAGE",
+                "links": [
+                  101
+                ],
+                "slot_index": 0
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "SeedVR2Preprocess"
+            },
+            "widgets_values": [],
+            "title": "SeedVR2 预处理"
+          },
+          {
+            "id": 7,
+            "type": "VAEEncodeTiled",
+            "pos": [
+              840,
+              40
+            ],
+            "size": [
+              340,
+              194
+            ],
+            "flags": {},
+            "order": 3,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "pixels",
+                "name": "pixels",
+                "type": "IMAGE",
+                "link": 101
+              },
+              {
+                "localized_name": "vae",
+                "name": "vae",
+                "type": "VAE",
+                "link": 102
+              }
+            ],
+            "outputs": [
+              {
+                "name": "LATENT",
+                "type": "LATENT",
+                "links": [
+                  104,
+                  108
+                ],
+                "slot_index": 0
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "VAEEncodeTiled"
+            },
+            "widgets_values": [
+              512,
+              128,
+              4096,
+              8
+            ],
+            "title": "VAE 编码(分块)"
+          },
+          {
+            "id": 8,
+            "type": "SeedVR2Conditioning",
+            "pos": [
+              1260,
+              40
+            ],
+            "size": [
+              340,
+              90
+            ],
+            "flags": {},
+            "order": 4,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "model",
+                "name": "model",
+                "type": "MODEL",
+                "link": 103
+              },
+              {
+                "localized_name": "vae_conditioning",
+                "name": "vae_conditioning",
+                "type": "LATENT",
+                "link": 104
+              }
+            ],
+            "outputs": [
+              {
+                "name": "positive",
+                "type": "CONDITIONING",
+                "links": [
+                  106
+                ],
+                "slot_index": 0
+              },
+              {
+                "name": "negative",
+                "type": "CONDITIONING",
+                "links": [
+                  107
+                ],
+                "slot_index": 1
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "SeedVR2Conditioning"
+            },
+            "widgets_values": [],
+            "title": "SeedVR2 条件"
+          },
+          {
+            "id": 9,
+            "type": "KSampler",
+            "pos": [
+              1680,
+              40
+            ],
+            "size": [
+              340,
+              272
+            ],
+            "flags": {},
+            "order": 5,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "model",
+                "name": "model",
+                "type": "MODEL",
+                "link": 105
+              },
+              {
+                "localized_name": "positive",
+                "name": "positive",
+                "type": "CONDITIONING",
+                "link": 106
+              },
+              {
+                "localized_name": "negative",
+                "name": "negative",
+                "type": "CONDITIONING",
+                "link": 107
+              },
+              {
+                "localized_name": "latent_image",
+                "name": "latent_image",
+                "type": "LATENT",
+                "link": 108
+              },
+              {
+                "localized_name": "seed",
+                "name": "seed",
+                "type": "INT",
+                "widget": {
+                  "name": "seed"
+                },
+                "link": 116
+              },
+              {
+                "localized_name": "sampler_name",
+                "name": "sampler_name",
+                "type": "COMBO",
+                "widget": {
+                  "name": "sampler_name"
+                },
+                "link": 117
+              },
+              {
+                "localized_name": "scheduler",
+                "name": "scheduler",
+                "type": "COMBO",
+                "widget": {
+                  "name": "scheduler"
+                },
+                "link": 118
+              },
+              {
+                "localized_name": "denoise",
+                "name": "denoise",
+                "type": "FLOAT",
+                "widget": {
+                  "name": "denoise"
+                },
+                "link": 119
+              }
+            ],
+            "outputs": [
+              {
+                "name": "LATENT",
+                "type": "LATENT",
+                "links": [
+                  109
+                ],
+                "slot_index": 0
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "KSampler"
+            },
+            "widgets_values": [
+              42,
+              "fixed",
+              1,
+              1.0,
+              "euler",
+              "simple",
+              1.0
+            ],
+            "title": "SeedVR2 一步采样"
+          },
+          {
+            "id": 10,
+            "type": "VAEDecodeTiled",
+            "pos": [
+              2100,
+              40
+            ],
+            "size": [
+              340,
+              194
+            ],
+            "flags": {},
+            "order": 6,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "samples",
+                "name": "samples",
+                "type": "LATENT",
+                "link": 109
+              },
+              {
+                "localized_name": "vae",
+                "name": "vae",
+                "type": "VAE",
+                "link": 110
+              }
+            ],
+            "outputs": [
+              {
+                "name": "IMAGE",
+                "type": "IMAGE",
+                "links": [
+                  111
+                ],
+                "slot_index": 0
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "VAEDecodeTiled"
+            },
+            "widgets_values": [
+              512,
+              128,
+              4096,
+              8
+            ],
+            "title": "VAE 解码(分块)"
+          },
+          {
+            "id": 11,
+            "type": "SeedVR2PostProcessing",
+            "pos": [
+              2520,
+              40
+            ],
+            "size": [
+              340,
+              116
+            ],
+            "flags": {},
+            "order": 7,
+            "mode": 0,
+            "inputs": [
+              {
+                "localized_name": "images",
+                "name": "images",
+                "type": "IMAGE",
+                "link": 111
+              },
+              {
+                "localized_name": "original_resized_images",
+                "name": "original_resized_images",
+                "type": "IMAGE",
+                "link": 113
+              },
+              {
+                "localized_name": "color_correction_method",
+                "name": "color_correction_method",
+                "type": "COMBO",
+                "widget": {
+                  "name": "color_correction_method"
+                },
+                "link": 120
+              }
+            ],
+            "outputs": [
+              {
+                "name": "images",
+                "type": "IMAGE",
+                "links": [
+                  121
+                ],
+                "slot_index": 0
+              }
+            ],
+            "properties": {
+              "Node name for S&R": "SeedVR2PostProcessing"
+            },
+            "widgets_values": [
+              "none"
+            ],
+            "title": "SeedVR2 后处理"
+          }
+        ],
+        "groups": [
+          {
+            "id": 1,
+            "title": "模型",
+            "bounding": [
+              10,
+              10,
+              350,
+              380
+            ],
+            "color": "#3f789e",
+            "flags": {}
+          }
+        ],
+        "links": [
+          {
+            "id": 101,
+            "origin_id": 6,
+            "origin_slot": 0,
+            "target_id": 7,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 102,
+            "origin_id": 5,
+            "origin_slot": 0,
+            "target_id": 7,
+            "target_slot": 1,
+            "type": "VAE"
+          },
+          {
+            "id": 103,
+            "origin_id": 4,
+            "origin_slot": 0,
+            "target_id": 8,
+            "target_slot": 0,
+            "type": "MODEL"
+          },
+          {
+            "id": 104,
+            "origin_id": 7,
+            "origin_slot": 0,
+            "target_id": 8,
+            "target_slot": 1,
+            "type": "LATENT"
+          },
+          {
+            "id": 105,
+            "origin_id": 4,
+            "origin_slot": 0,
+            "target_id": 9,
+            "target_slot": 0,
+            "type": "MODEL"
+          },
+          {
+            "id": 106,
+            "origin_id": 8,
+            "origin_slot": 0,
+            "target_id": 9,
+            "target_slot": 1,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 107,
+            "origin_id": 8,
+            "origin_slot": 1,
+            "target_id": 9,
+            "target_slot": 2,
+            "type": "CONDITIONING"
+          },
+          {
+            "id": 108,
+            "origin_id": 7,
+            "origin_slot": 0,
+            "target_id": 9,
+            "target_slot": 3,
+            "type": "LATENT"
+          },
+          {
+            "id": 109,
+            "origin_id": 9,
+            "origin_slot": 0,
+            "target_id": 10,
+            "target_slot": 0,
+            "type": "LATENT"
+          },
+          {
+            "id": 110,
+            "origin_id": 5,
+            "origin_slot": 0,
+            "target_id": 10,
+            "target_slot": 1,
+            "type": "VAE"
+          },
+          {
+            "id": 111,
+            "origin_id": 10,
+            "origin_slot": 0,
+            "target_id": 11,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 112,
+            "origin_id": -10,
+            "origin_slot": 0,
+            "target_id": 6,
+            "target_slot": 0,
+            "type": "IMAGE"
+          },
+          {
+            "id": 113,
+            "origin_id": -10,
+            "origin_slot": 0,
+            "target_id": 11,
+            "target_slot": 1,
+            "type": "IMAGE"
+          },
+          {
+            "id": 114,
+            "origin_id": -10,
+            "origin_slot": 1,
+            "target_id": 4,
+            "target_slot": 0,
+            "type": "COMBO"
+          },
+          {
+            "id": 115,
+            "origin_id": -10,
+            "origin_slot": 2,
+            "target_id": 5,
+            "target_slot": 0,
+            "type": "COMBO"
+          },
+          {
+            "id": 116,
+            "origin_id": -10,
+            "origin_slot": 3,
+            "target_id": 9,
+            "target_slot": 4,
+            "type": "INT"
+          },
+          {
+            "id": 117,
+            "origin_id": -10,
+            "origin_slot": 4,
+            "target_id": 9,
+            "target_slot": 5,
+            "type": "COMBO"
+          },
+          {
+            "id": 118,
+            "origin_id": -10,
+            "origin_slot": 5,
+            "target_id": 9,
+            "target_slot": 6,
+            "type": "COMBO"
+          },
+          {
+            "id": 119,
+            "origin_id": -10,
+            "origin_slot": 6,
+            "target_id": 9,
+            "target_slot": 7,
+            "type": "FLOAT"
+          },
+          {
+            "id": 120,
+            "origin_id": -10,
+            "origin_slot": 7,
+            "target_id": 11,
+            "target_slot": 2,
+            "type": "COMBO"
+          },
+          {
+            "id": 121,
+            "origin_id": 11,
+            "origin_slot": 0,
+            "target_id": -20,
+            "target_slot": 0,
+            "type": "IMAGE"
+          }
+        ],
+        "extra": {}
+      }
+    ]
+  },
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}
