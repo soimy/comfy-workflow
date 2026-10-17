@@ -45,3 +45,41 @@
     另外 `KSampler` 的 seed 后面前端会多注入一个 `control_after_generate` widget，
     `LoadImage` 的图片上传按钮也算一个 widget（值 `"image"`）。
 
+14. **子图（subgraph）工作流的 JSON 约定**（对照 `utility_seedvr2_3b_int8_upscale_image.json`，
+    并用 624 份官方模板统计验证）：
+    - 顶层多一个 `definitions.subgraphs` 数组；外层用节点图的那个节点 `type` 直接填子图 `id`（UUID）。
+    - 子图内有虚拟代理节点 `inputNode: {"id": -10}` / `outputNode: {"id": -20}`，它们**不出现在 `nodes` 里**，
+      但会出现在 `links` 表里：`origin_id = -10` 表示「从子图输入来」，`target_id = -20` 表示「接到子图输出」。
+    - 子图 `inputs[].linkIds` 中，每条 link 的 `origin_slot` 等于该输入在 `inputs` 数组里的**下标**；
+      `outputs[].linkIds` 里 `origin_slot` 用 `-20` 侧的输出槽位。
+    - **只有带 `label` 的子图输入才会同时出现在外层节点的 `inputs` 里**。官方那份 10 个输入里
+      仅 `resize_type.multiplier` 带 `label`，外层节点 inputs 里也就只有它 —— 想暴露成端口就得加 `label`。
+    - 被提升成控件的入参必须三处同时到位且**顺序一致**：子图输入加 `label`、内部节点入参加
+      `{"widget": {"name": ...}}`、外层节点 `properties.proxyWidgets` 记 `[内部节点id, 控件名]`。
+    - `widgets_values` 里**仍要保留被提升控件的占位值**（如 KSampler 的 seed/denoise），原理同第 13 条。
+    - 子图展开是浏览器侧行为，headless 测不到；结构可机械校验（连线双向登记、槽位索引、类型兼容、
+      节点类型存在于 `/object_info`、子图键集合与官方模板比对），但**首次用前必须在界面跑一次**。
+
+15. **自定义节点不要写进 `ComfyUI` submodule 里**（踩过的坑）：
+    把 `custom_nodes/ComfyUI-SimpleUpscale/` 放进 submodule 内部会产生**只存在于本地的提交**，
+    submodule 指针随之指向官方仓库里不存在的 commit，于是 `git clone --recurse-submodules` 直接失败：
+    `upload-pack: not our ref <sha>` / `没有包含 <sha>，直接获取该提交失败`。
+    而且换机器时这部分代码永远拿不回来。
+    正确做法：自定义节点放**主仓库**的 `custom_nodes/`，安装脚本用软链接挂进 ComfyUI：
+    `ln -s "$REPO/custom_nodes/$name" "$COMFY/custom_nodes/$name"`（用软链不用拷贝，改一处两边同步）。
+    submodule 指针始终保持在官方上游提交上。
+    另注：submodule 内 `__pycache__` 属主是容器内的 uid，宿主机删不掉，需 `podman exec <容器> rm -rf`。
+
+16. **OOM 之后显存可能再也还不回来**，此时「卸载模型」和 `POST /free` 都无效：
+    - 症状：`/system_stats` 里 `torch_vram_total` 远大于 `torch_vram_free`（例如 7.44 GiB / 0.01 GiB），
+      说明 torch 认为这些张量仍是 active，池里没有可回收的块，`empty_cache` 无块可吐。
+    - 判断调用确实执行了（而非没触发）：看 `main.py` 主循环是否被 `set_flag` 唤醒 ——
+      调 `/free` 前后对比 `/proc/<pid>/stat` 的 `utime+stime` 增量；以及日志里
+      `CacheSet.__init__` 打的 `Using RAM pressure cache.` 就是 `PromptExecutor.reset()` 的指纹。
+    - 根治手段只有重启。**注意别用 `podman restart <容器>`**：若 ComfyUI 是 `distrobox enter` /
+      `podman exec` 里手敲起来的（不是容器主进程），重启容器只会杀掉它、不会自动拉起。
+    - 推荐 `POST /manager/reboot`（等价于 Manager 界面的 Restart）：环境里没有 `__COMFY_CLI_SESSION__`
+      时走 `os.execv` **原地重启**，PID 不变、参数不变、日志继续写同一文件，约 10 秒恢复。
+    - 实测：SeedVR2 3B int8 在 16 GB 卡上 2x 成功、4x 必 OOM（像素差 4 倍，token 数 204k → 817k，
+      单个 bf16 激活 1.0 → 3.9 GiB，单层 fp32 累加缓冲 1.9 → 7.8 GiB）。
+      解决办法是分片（空间切块 + 正弦羽化拼接），不是调低精度。
